@@ -5,8 +5,10 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -14,8 +16,10 @@ import java.util.List;
 
 import cn.bmob.v3.Bmob;
 import cn.bmob.v3.BmobQuery;
+import cn.bmob.v3.datatype.BmobQueryResult;
 import cn.bmob.v3.exception.BmobException;
 import cn.bmob.v3.listener.FindListener;
+import cn.bmob.v3.listener.SQLQueryListener;
 import cn.bmob.v3.listener.UpdateListener;
 
 public class MainActivity extends AppCompatActivity implements  OnDelListener{
@@ -23,6 +27,9 @@ public class MainActivity extends AppCompatActivity implements  OnDelListener{
     private Button btnGet;
     private List<Student>  stuList = new ArrayList<Student>();
     private MyAdapter mAdapter;
+    private EditText searchEdt;
+    private Button searchBtn;
+    private  Button mButtonReg;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,6 +45,33 @@ public class MainActivity extends AppCompatActivity implements  OnDelListener{
     private void initView() {
         mRecyclerView = (RecyclerView) findViewById(R.id.recyclerview);
         btnGet = (Button) findViewById(R.id.btn_get);
+        searchBtn = (Button) findViewById(R.id.search_btn);
+        searchEdt = (EditText) findViewById(R.id.search_edt);
+        mButtonReg = (Button) findViewById(R.id.register);
+        mButtonReg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this,RegActivity.class));
+            }
+        });
+        searchBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String  age = searchEdt.getText().toString().trim();
+                BmobQuery<Student> query = new BmobQuery<Student>();
+                String sql = "select * from Student where age = "+age;
+                query.doSQLQuery(sql, new SQLQueryListener<Student>() {
+                    @Override
+                    public void done(BmobQueryResult<Student> bmobQueryResult, BmobException e) {
+                       if (e==null){
+                           mAdapter.setData(bmobQueryResult.getResults());
+                       }else{
+                           Toast.makeText(MainActivity.this,e.toString(),Toast.LENGTH_LONG).show();
+                       }
+                    }
+                });
+            }
+        });
         btnGet.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -50,7 +84,6 @@ public class MainActivity extends AppCompatActivity implements  OnDelListener{
     protected void onResume() {
         super.onResume();
         getAllMsg();
-        mAdapter.notifyDataSetChanged();
     }
 
 
@@ -60,11 +93,10 @@ public class MainActivity extends AppCompatActivity implements  OnDelListener{
             @Override
             public void done(List<Student> list, BmobException e) {
                 if (e==null){
-                    stuList.clear();
-                    stuList.addAll(list);
-                    mAdapter.notifyDataSetChanged();
+                    mAdapter.setData(list);
                 }else {
-                    Toast.makeText(MainActivity.this,"data load is failed",Toast.LENGTH_LONG).show();
+                    Toast.makeText(MainActivity.this,e.toString(),Toast.LENGTH_LONG).show();
+                    Log.i("AAAA",e.toString());
                 }
             }
         });

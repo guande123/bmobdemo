@@ -1,6 +1,7 @@
 package com.example.yls.bmobdemo;
 
 import cn.bmob.v3.BmobObject;
+import cn.bmob.v3.datatype.BmobFile;
 
 /**
  * Created by yls on 2017/3/7.
@@ -38,5 +39,18 @@ public class Student extends BmobObject{
 public Student(){}
     private String name;
     private String add;
+
+
+
     private int age;
+
+    public BmobFile getImgtx() {
+        return imgtx;
+    }
+
+    public void setImgtx(BmobFile imgtx) {
+        this.imgtx = imgtx;
+    }
+
+    private BmobFile imgtx;
 }
